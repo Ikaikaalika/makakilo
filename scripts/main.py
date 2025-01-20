@@ -1,18 +1,18 @@
 import cv2
 from object_detection import YOLOv8Detector
+from face_recognition_util import FaceRecognition
 
 def main(output_path=None):
-    # Step 1: Initialize YOLOv8 Detector
+    # Initialize YOLOv8 Detector and Face Recognition
     detector = YOLOv8Detector()
+    face_recognizer = FaceRecognition()
 
-    # Step 2: Access the MacBook webcam
-    cap = cv2.VideoCapture(0)  # 0 indicates the default webcam
-
-    # Define video writer if saving output
+    # Open webcam
+    cap = cv2.VideoCapture(0)
     out = None
     if output_path:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        fps = 30  # Set FPS for output video
+        fps = 30
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
@@ -24,32 +24,27 @@ def main(output_path=None):
             print("Failed to grab frame. Exiting.")
             break
 
-        # Step 3: Perform YOLOv8 object detection
+        # Step 1: Perform YOLOv8 object detection
         results = detector.detect_objects(frame)
 
-        # Step 4: Crop faces from detections
-        detections = results[0]  # First result corresponds to the current frame
-        faces = detector.detect_faces(frame, detections)
+        # Step 2: Crop faces from detections
+        detections = results[0]
+        face_locations = detector.detect_faces(frame, detections)
 
-        # Step 5: Analyze faces for emotions and demographics
-        analyses = detector.analyze_faces(faces)
+        # Step 3: Recognize faces
+        recognized_faces = face_recognizer.recognize_faces(frame, face_locations)
 
-        # Step 6: Annotate the frame with detection results
-        annotated_frame = results[0].plot()
+        # Step 4: Annotate frame with recognition data
+        for name, location in recognized_faces:
+            top, right, bottom, left = location
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+            cv2.putText(frame, name, (left, top - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-        # Overlay demographic and emotion data on the frame
-        for idx, analysis in enumerate(analyses):
-            text = f"{analysis['dominant_emotion']}, {analysis['age']}, {analysis['gender']}"
-            cv2.putText(annotated_frame, text, (10, 30 + idx * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-
-        # Display the annotated frame
-        cv2.imshow('YOLOv8 Detection with Emotion and Demographics', annotated_frame)
-
-        # Save the annotated frame if output_path is provided
+        # Display and save the frame
+        cv2.imshow('YOLOv8 with Face Recognition', frame)
         if out:
-            out.write(annotated_frame)
+            out.write(frame)
 
-        # Exit on pressing 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -62,7 +57,7 @@ def main(output_path=None):
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='YOLOv8 Webcam Detection Tool with Emotion and Demographics')
+    parser = argparse.ArgumentParser(description='YOLOv8 Webcam Detection with Face Recognition')
     parser.add_argument('--output', type=str, help='Path to save the processed video (optional)')
     args = parser.parse_args()
 
