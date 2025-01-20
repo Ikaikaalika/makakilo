@@ -94,5 +94,3 @@ Contributing
 License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-Copy and save this content as `README.md` in your project directory. Let me know if you need further assistance!
