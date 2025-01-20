@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 class YOLOv8Detector:
-    def __init__(self, model_path='models/yolov8s.pt'):
+    def __init__(self, model_path='models/yolov8n.pt'):
         # Load YOLOv8 model
         self.model = YOLO(model_path)
 
@@ -24,11 +24,4 @@ class YOLOv8Detector:
                 face = frame[int(y1):int(y2), int(x1):int(x2)]
                 faces.append(face)
 
-        return faces
-
-    def analyze_faces(self, faces):
-        """
-        Placeholder for analyzing cropped faces (emotion, demographics).
-        Can integrate with DeepFace or custom models.
-        """
         return faces
