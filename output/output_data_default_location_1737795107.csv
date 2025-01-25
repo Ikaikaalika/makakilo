@@ -1,0 +1,2 @@
+Frame,Unix Time,Name,Age (Confidence),Gender (Confidence),Emotion (Confidence),Race Percentages,Bounding Box
+15,1737795128,Unknown,36 (N/A),"{'Woman': 68.01202297210693, 'Man': 31.987982988357544}",sad (99.62),"{'asian': 5.953881144523621, 'indian': 9.775709360837936, 'black': 2.871202677488327, 'white': 30.054205656051636, 'middle eastern': 29.60626482963562, 'latino hispanic': 21.73873484134674}","[417, 7, 1639, 1070]"

@@ -14,14 +14,17 @@ class YOLOv8Detector:
     def detect_faces(self, frame, detections):
         """
         Extract faces from YOLOv8 detections for further analysis.
+        :param frame: Input frame (image).
+        :param detections: YOLOv8 detection results.
+        :return: List of tuples containing face crops and bounding boxes.
         """
         faces = []
-        for detection in detections.boxes:  # Iterate through detected boxes
-            x1, y1, x2, y2 = detection.xyxy[0]  # Bounding box coordinates
-            cls = int(detection.cls[0])  # Class ID (0 = person in COCO)
-            
+        for box in detections.boxes:  # Iterate through detected boxes
+            cls = int(box.cls[0])  # Class ID (0 = person in COCO dataset)
             if cls == 0:  # Check if detection is a person
-                face = frame[int(y1):int(y2), int(x1):int(x2)]
-                faces.append(face)
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # Bounding box coordinates
+                face = frame[y1:y2, x1:x2]  # Crop the face
+                print(f"Face detected: {face}, BBox: {x1, y1, x2, y2}")
+                faces.append((face, (x1, y1, x2, y2)))  # Add the face and its bounding box
 
         return faces
