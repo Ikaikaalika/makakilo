@@ -4,6 +4,7 @@ import time
 from object_detection import YOLOv8Detector
 from face_recognition_util import FaceRecognition
 from deepface import DeepFace
+import os
 
 def analyze_face(face):
     """
@@ -34,14 +35,13 @@ def main(output_path=None, location="default_location"):
     face_recognizer = FaceRecognition()
 
     # Ensure the output directory exists
-    import os
     os.makedirs("output", exist_ok=True)
 
-    # Generate a unique CSV filename
+    # Generate a unique Unix timestamp for this session
     unix_time = int(time.time())
-    csv_path = f"output/output_data_{location}_{unix_time}.csv"
 
-    # Initialize CSV file
+    # Create unique CSV filename
+    csv_path = f"output/output_data_{location}_{unix_time}.csv"
     with open(csv_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([
@@ -50,11 +50,16 @@ def main(output_path=None, location="default_location"):
             "Race Percentages", "Bounding Box"
         ])
 
+    # If no video output path is provided, generate one automatically using the location and Unix time
+    if not output_path:
+        output_path = f"output/output_video_{location}_{unix_time}.mp4"
+
     cap = cv2.VideoCapture(0)
     out = None
     frame_count = 0
     log_buffer = []  # Buffer to store log data
 
+    # Setup video writer using the unique output path
     if output_path:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         fps = 30
@@ -126,7 +131,8 @@ def main(output_path=None, location="default_location"):
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-    # Flush remaining data in the buffer to CSV
+
+    # Flush any remaining data to CSV
     if log_buffer:
         flush_buffer_to_csv(log_buffer, csv_path)
 
